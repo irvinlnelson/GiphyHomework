@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Giphy Fun</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" />
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <div class="container">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control player-input" placeholder="Add a player from the Lakers current roster" aria-label="Recipient's username"
+                aria-describedby="button-addon2">
+            <div class="input-group-append">
+                <!-- this button will add new player to array -->
+                <button class="btn btn-outline-secondary" type="button" id="button-addon2">Submit</button>
+            </div>
+            <div id="button-area"></div>
+            <div id="giphy-display"></div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        //array of players that will already be displayed
+        var players = ["LeBron James", "Rajon Rondo", "Lonzo Ball"];
+
+        //some things I will need for the api query
+        // api.giphy.com
+        // path /v1/gifs/search
+        //&apikey=TxAYO7DBs1rQn5cG173MESy9G7MtLztf
+
+
+
+        //displayPlayer function will rerender the html to display the proper content
+
+        $(document).ready(function () {
+            renderButtons();
+            function renderButtons() {
+
+
+                $("#button-area").empty();
+
+                for (var i = 0; i < players.length; i++) {
+                    var newButton = $("<button>");
+                    newButton.addClass("player-button");
+                    newButton.addClass("btn btn-success");
+                    newButton.text(players[i]);
+                    newButton.attr("data-name", players[i]);
+                    $("#button-area").append(newButton);
+
+
+
+                }
+
+
+            }
+
+            $("#button-addon2").on("click", function (event) {
+                event.preventDefault();
+                displayPlayer();
+                var addedData = $(".player-input").val().trim();
+                if (addedData != "") {
+                    players.push(addedData);
+                    renderButtons();
+                    $("#player-input").val(" ");
+                }
+
+
+            });
+
+
+            $(document).on("click", ".player-button", displayPlayer);
+
+
+
+
+
+
+
+            function displayPlayer() {
+
+
+                var player = $(this).attr("data-name");
+                var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + player + "&api_key=TxAYO7DBs1rQn5cG173MESy9G7MtLztf&limit=10";
+
+                console.log(player);
+                $("#giphy-display").empty();
+
+                $.ajax({
+                    url: queryURL,
+                    method: "GET"
+                }).then(function (response) {
+                    console.log(response);
+
+                    var results = response.data;
+
+                    for (var i = 0; i < results.length; i++) {
+                        var giphyDiv = $("<img>");
+                        giphyDiv.attr("src", results[i].images.fixed_height_still.url);
+                        giphyDiv.attr("data-still", results[i].images.fixed_height_still.url);
+                        giphyDiv.attr("data-animate", results[i].images.fixed_height.url);
+                        giphyDiv.addClass("gif");
+                        giphyDiv.attr("data-state", "still");
+
+
+                        var newItemdiv = $('<div class="newItem">');
+
+                        newItemdiv.append(giphyDiv);
+
+                        $("#giphy-display").prepend(newItemdiv);
+
+                    };
+
+
+
+
+
+                });
+
+            }
+
+            $("#giphy-display").on("click", ".gif", function () {
+                var state = $(this).attr("data-state");
+                if (state === "still") {
+                    $(this).attr("src", $(this).attr("data-animate"));
+                    $(this).attr("data-state", "animate");
+                }
+
+                else if (state === "animate") {
+                    $(this).attr("src", $(this).attr("data-still"));
+                    $(this).attr("data-state", "still");
+                }
+
+            });
+
+        })
+        // function buildQueryURL() {
+        //     // queryURL is the url we'll use to query the API
+        //     var queryURL = "https://api.giphy.com/v1/gifs/search?";
+
+        //     // Begin building an object to contain our API call's query parameters
+        //     // Set the API key
+        //     var queryParams = { "api-key": "TxAYO7DBs1rQn5cG173MESy9G7MtLztf" };
+
+        //     // Grab text the user typed into the search input, add to the queryParams object
+        //     queryParams.q = $(".player-input")
+        //         .val()
+        //     // .trim();
+
+        //     $.ajax({
+        //         url: queryURL,
+        //         method: "GET"
+        //     }).then(function (response) {
+
+        //         var playerDiv = $("<div>");
+        //         var gif = response.data[1].url;
+        //         $("#button-area").text(gif);
+
+        //         console.log(gif);
+        //     });
+        // };
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
